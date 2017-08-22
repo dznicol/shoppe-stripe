@@ -26,7 +26,12 @@ module Shoppe
         Shoppe::Order.before_confirmation do
           if properties['stripe_customer_token'] && total > 0.0
             begin
-              charge = ::Stripe::Charge.create({ customer: properties['stripe_customer_token'], amount: (total * BigDecimal(100)).round, currency: Shoppe.settings.stripe_currency, capture: false }, Shoppe::Stripe.api_key)
+              if respond_to?(:currency)
+                cur_currency = currency
+              else
+                cur_currency = Shoppe.settings.stripe_currency
+              end
+              charge = ::Stripe::Charge.create({ customer: properties['stripe_customer_token'], amount: (total * BigDecimal(100)).round, currency: cur_currency, capture: false }, Shoppe::Stripe.api_key)
               payments.create(amount: total, method: 'Stripe', reference: charge.id, refundable: true, confirmed: false)
             rescue ::Stripe::CardError
               raise Shoppe::Errors::PaymentDeclined, 'Payment was declined by the payment processor.'
