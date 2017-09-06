@@ -3,7 +3,10 @@ module Shoppe
     module OrderExtensions
       def accept_stripe_token(token)
         if token.start_with?('tok')
-          customer = ::Stripe::Customer.create({ description: "Customer for order #{number}", card: token }, Shoppe::Stripe.api_key)
+          customer = ::Stripe::Customer.create({ description: "Customer for order #{number}",
+                                                 card: token,
+                                                 email: email_address },
+                                               Shoppe::Stripe.api_key)
           properties['stripe_customer_token'] = customer.id
           save
         elsif token.start_with?('cus') && properties[:stripe_customer_token] != token
