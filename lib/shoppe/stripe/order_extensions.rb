@@ -4,7 +4,7 @@ module Shoppe
       def accept_stripe_token(token)
         if token.start_with?('tok')
           customer = ::Stripe::Customer.create({ description: "Customer for order #{number}",
-                                                 card: token,
+                                                 source: token,
                                                  email: email_address },
                                                Shoppe::Stripe.api_key)
           properties['stripe_customer_token'] = customer.id
